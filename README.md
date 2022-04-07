@@ -9,3 +9,4 @@ $ git commit -m "initial rails commit"
 $ git push origin main
 $ bundle add rspec-rails
 $ rails generate rspec:install
+$ rails generate resource Cat name:string age:integer enjoys:text image:text
