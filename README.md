@@ -41,10 +41,70 @@ cats.each do |each_cat|
 end
 ```
 
-$ rails db:seed
+  $ rails db:seed
 
 app/controllers/application_controller.rb
 `skip_before_action :verify_authenticity_token`
 
 /Gemfile
 `gem 'rack-cors', :require => 'rack/cors'`
+
+# API Endpoints
+ $ rails routes
+ ```
+  Prefix Verb   URI Pattern                                                                                       Controller#Action
+                                    cats GET    /cats(.:format)                                                                                   cats#index
+                                        POST   /cats(.:format)                                                                                   cats#create
+                                new_cat GET    /cats/new(.:format)                                                                               cats#new
+                                edit_cat GET    /cats/:id/edit(.:format)                                                                          cats#edit
+                                    cat GET    /cats/:id(.:format)                                                                               cats#show
+                                        PATCH  /cats/:id(.:format)                                                                               cats#update
+                                        PUT    /cats/:id(.:format)                                                                               cats#update
+                                        DELETE /cats/:id(.:format)                                                                               cats#destroy
+
+```
+
+# Validations
+- Creating Data Validations and associated tests to ensure the effectiveness of our application.
+- As a developer, I can add the appropriate model specs that will ensure an incomplete cat throws an error.
+- As a developer, I can add the appropriate request validations to ensure the API is sending useful information to the frontend developer if a new cat is not valid.
+
+```ruby
+class Cat < ApplicationRecord
+  # Validations go here
+  validates :name, :age, :enjoys, presence: true
+  validates :enjoys, length: { minimum: 10 }
+end
+```
+
+spec/models/cat_spec.rb - Example
+```ruby
+describe 'Create cat' do
+   it 'wont create a cat in the database without a name' do
+    # make a cat without the paramter being tested for
+     cat = Cat.create age: 999, enjoys: 'playing with yarn (the package manager not the thread)', image: 'https://upload.wikimedia.org/wikipedia/commons/3/38/Adorable-animal-cat-20787.jpg'
+    #  expect the model to throw an error
+    p cat.errors[:name]
+    expect(cat.errors[:name]).to_not be_empty
+   end
+  end
+```
+spec/requests/cats_spec.rb - Example 
+```ruby
+describe 'cannot create a cat without valid attributes' do
+    it 'cannot create a cat without a name' do
+      cat_params = {
+        cat: {
+          age: 6,
+          enjoys: 'Showing up in odd places randomly',
+          image: 'https://helios-i.mashable.com/imagery/articles/009YzbEnPjDaHspw2iRWT5p/images-1.fit_lim.size_2000x.v1611696799.png'
+        }
+      }
+
+      post '/cats', params: cat_params
+      cat = JSON.parse(response.body)
+      expect(response).to have_http_status(422)
+      expect(cat['name']).to include "can't be blank"
+    end
+  end
+```
