@@ -37,5 +37,21 @@ RSpec.describe Cat, type: :model do
 
     expect(cat.errors[:enjoys]).to_not be_empty
    end
+   it 'wont create a cat in the database without an image' do
+    # make a cat without the paramter being tested for
+     cat = Cat.create name: 'Monster Truck', age: 999, enjoys: 'playing with yarn (the package manager not the thread)'
+
+    #  expect the model to throw an error
+    p cat.errors[:image]
+    expect(cat.errors[:image]).to_not be_empty
+   end
+   it 'wont create a cat in the database with an image that is a duplicate' do
+    # make a cat without the paramter being tested for
+    cat1 = Cat.create name: 'Monster Truck', age: 999, enjoys: 'playing with yarn (the package manager not the thread)', image: 'https://upload.wikimedia.org/wikipedia/commons/3/38/Adorable-animal-cat-20787.jpg'
+    cat = Cat.create name: 'Monster Truck', age: 999, enjoys: 'playing with yarn (the package manager not the thread)',  image: 'https://upload.wikimedia.org/wikipedia/commons/3/38/Adorable-animal-cat-20787.jpg'
+    #  expect the model to throw an error
+    p cat.errors[:image]
+    expect(cat.errors[:image]).to_not be_empty
+   end
  end
 end

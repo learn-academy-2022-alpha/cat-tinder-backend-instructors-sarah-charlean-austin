@@ -118,5 +118,52 @@ RSpec.describe "Cats", type: :request do
       expect(response).to have_http_status(422)
       expect(cat['enjoys']).to include "can't be blank"
     end
+    it 'cannot create a cat without an enjoys that is less than 10 characters' do
+      cat_params = {
+        cat: {
+          name: 'Mosey',
+          age: 6,
+          enjoys: 'Showing',
+          image: 'https://helios-i.mashable.com/imagery/articles/009YzbEnPjDaHspw2iRWT5p/images-1.fit_lim.size_2000x.v1611696799.png'
+        }
+      }
+
+      post '/cats', params: cat_params
+      cat = JSON.parse(response.body)
+      expect(response).to have_http_status(422)
+      expect(cat['enjoys']).to include "is too short (minimum is 10 characters)"
+    end
+    it 'cannot create a cat without an image' do
+      cat_params = {
+        cat: {
+          name: 'Mosey',
+          age: 6,
+          enjoys: 'Showing up in odd places randomly'
+        }
+      }
+
+      post '/cats', params: cat_params
+      cat = JSON.parse(response.body)
+      expect(response).to have_http_status(422)
+      expect(cat['image']).to include "can't be blank"
+    end
+    it 'cannot create a cat with an image that is already assigned to another cat' do
+      cat_params = {
+        cat: {
+          name: 'Mosey',
+          age: 6,
+          enjoys: 'Showing up in odd places randomly',
+          image: 'https://helios-i.mashable.com/imagery/articles/009YzbEnPjDaHspw2iRWT5p/images-1.fit_lim.size_2000x.v1611696799.png'
+        }
+      }
+      # first post to DB
+      post '/cats', params: cat_params
+
+      # second post to DB
+      post '/cats', params: cat_params
+      cat = JSON.parse(response.body)
+      expect(response).to have_http_status(422)
+      expect(cat['image']).to include "has already been taken"
+    end
   end
  end
